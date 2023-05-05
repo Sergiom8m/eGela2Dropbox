@@ -22,12 +22,72 @@ class Dropbox:
         self._root = root
 
     def local_server(self):
-        # sartu kodea hemen
+        server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        server_socket.bind(('localhost', 8090))
+        server_socket.listen(1)
+        print('Socket listening on port 8090')
+
+        print('Waiting for client request')
+        # In the following line the program stops until the server receives 302 requests.
+        client_connection, client_adress = server_socket.accept()
+
+        # Receive 302 response from the explorer
+        request = client_connection.recv(1024).decode()
+        # print('\n' + request)
+
+        # Search for the auth_code on the request
+        first_line = request.split('\n')[0]
+        aux_auth_code = first_line.split(' ')[1]
+        auth_code = aux_auth_code[7:].split('&')[0]
+        print("Auth_code: " + auth_code)
+
+        # Send a response to the user
+        http_response = """\
+            HTTP/1.1 200 OK
+
+            <html>
+            <head><title>Proba</title></head>
+            <body>
+            The authentication flow has completed. Close this window.
+            </body>
+            </html>
+            """
+
+        client_connection.sendall(str.encode(http_response))
+        client_connection.close()
+        server_socket.close()
 
         return auth_code
 
     def do_oauth(self):
-        # sartu kodea hemen
+        # Authorization
+        uri = "https://www.dropbox.com/oauth2/authorize"
+        data = {'client_id': app_key,
+                'redirect_uri': redirect_uri,  # LoopBack IP address
+                'response_type': 'code'}
+
+        coded_data = urllib.parse.urlencode(data)
+        uri = uri + '?' + coded_data
+        webbrowser.open_new(uri)  # Open the request on the explorer (GET is the predetermined method)
+        auth_code = local_server()
+
+        # Exchange authorization code for access token
+        uri = "https://api.dropboxapi.com/oauth2/token"
+        headers = {'Host': 'api.dropboxapi.com',
+                   'Content-Type': 'application/x-www-form-urlencoded'}
+        data = {'code': auth_code,
+                'client_id': app_key,
+                'client_secret': app_secret,
+                'redirect_uri': redirect_uri,  # LoopBack IP address
+                'grant_type': 'authorization_code'}
+
+        response = requests.post(uri, headers=headers, data=data, allow_redirects=False)
+
+        status_code = response.status_code
+        content = response.text
+        content_json = json.loads(content)
+        access_token = content_json['access_token']
+        print('Access token:' + access_token)
 
         self._access_token = access_token
         self._root.destroy()
@@ -35,24 +95,26 @@ class Dropbox:
     def list_folder(self, msg_listbox, cursor="", edukia_json_entries=[]):
         if not cursor:
             print("/list_folder")
-            uri =
-            datuak =
-            # sartu kodea hemen
+            uri = "https://api.dropboxapi.com/2/files/list_folder"
+            data = {'path': self._path}
+
         else:
-            print("/list_folder/continue")
-            uri =
-            datuak =
-            # sartu kodea hemen
+            uri = "https://api.dropboxapi.com/2/files/list_folder/continue"
+            data = {'cursor': cursor}
 
+        data_json = json.dumps(data)
         # Call Dropbox API
-        # sartu kodea hemen
+        headers = {'Host': 'api.dropboxapi.com',
+                     'Authorization': 'Bearer ' + access_token,
+                     'Content-Type': 'application/json',
+                     'Content-Length': str(len(datuak_encoded))}
+        response = requests.post(uri, headers=headers, data=data_json, allow_redirects=False)
 
-        edukia_json = json.loads(edukia)
-        if edukia_json['has_more']:
-            # sartu kodea hemen
+        content = response.text
+        content_json = json.loads(content)
+        if content_json['has_more']:
             self.list_folder(msg_listbox, edukia_json['cursor'], edukia_json_entries)
         else:
-            # sartu kodea hemen
             self._files = helper.update_listbox2(msg_listbox, self._path, edukia_json_entries)
 
     def transfer_file(self, file_path, file_data):
