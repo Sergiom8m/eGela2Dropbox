@@ -248,7 +248,7 @@ class eGela:
         pdf_name = self._refs[selection]['pdf_name']
 
         method = 'GET'
-        headers = {'Host': pdf_file.split('/')[2], 'Cookie': self._cookiea}
+        headers = {'Host': pdf_file.split('/')[2], 'Cookie': self._cookie}
         content = ''
 
         response = requests.request(method, pdf_file, headers=headers, data=content,

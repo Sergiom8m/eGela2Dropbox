@@ -5,8 +5,8 @@ from socket import AF_INET, socket, SOCK_STREAM
 import json
 import helper
 
-app_key = ''
-app_secret = ''
+app_key = 'ii9gyhbmo2i3flo'
+app_secret = 'xrtgmxy1m4m9t8v'
 server_addr = "localhost"
 server_port = 8090
 redirect_uri = "http://" + server_addr + ":" + str(server_port)
@@ -22,7 +22,7 @@ class Dropbox:
         self._root = root
 
     def local_server(self):
-        server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        server_socket = socket(AF_INET, SOCK_STREAM)
         server_socket.bind(('localhost', 8090))
         server_socket.listen(1)
         print('Socket listening on port 8090')
@@ -69,7 +69,7 @@ class Dropbox:
         coded_data = urllib.parse.urlencode(data)
         uri = uri + '?' + coded_data
         webbrowser.open_new(uri)  # Open the request on the explorer (GET is the predetermined method)
-        auth_code = local_server()
+        auth_code = self.local_server()
 
         # Exchange authorization code for access token
         uri = "https://api.dropboxapi.com/oauth2/token"
@@ -92,7 +92,7 @@ class Dropbox:
         self._access_token = access_token
         self._root.destroy()
 
-    def list_folder(self, msg_listbox, cursor="", edukia_json_entries=[]):
+    def list_folder(self, msg_listbox, cursor="", content_json_entries=[]):
         if not cursor:
             print("/list_folder")
             uri = "https://api.dropboxapi.com/2/files/list_folder"
@@ -105,26 +105,26 @@ class Dropbox:
         data_json = json.dumps(data)
         # Call Dropbox API
         headers = {'Host': 'api.dropboxapi.com',
-                     'Authorization': 'Bearer ' + access_token,
+                     'Authorization': 'Bearer ' + self._access_token,
                      'Content-Type': 'application/json',
-                     'Content-Length': str(len(datuak_encoded))}
+                     'Content-Length': str(len(data_json))}
         response = requests.post(uri, headers=headers, data=data_json, allow_redirects=False)
 
         content = response.text
         content_json = json.loads(content)
         if content_json['has_more']:
-            self.list_folder(msg_listbox, edukia_json['cursor'], edukia_json_entries)
+            self.list_folder(msg_listbox, content_json['cursor'], content_json_entries)
         else:
-            self._files = helper.update_listbox2(msg_listbox, self._path, edukia_json_entries)
+            self._files = helper.update_listbox2(msg_listbox, self._path, content_json_entries)
 
     def transfer_file(self, file_path, file_data):
         print("/upload " + file_path)
-        # sartu kodea hemen
+
 
     def delete_file(self, file_path):
         print("/delete_file " + file_path)
-        # sartu kodea hemen
+
 
     def create_folder(self, path):
         print("/create_folder " + path)
-        # sartu kodea hemen
+
