@@ -11,6 +11,7 @@ server_addr = "localhost"
 server_port = 8090
 redirect_uri = "http://" + server_addr + ":" + str(server_port)
 
+
 class Dropbox:
     _access_token = ""
     _path = "/"
@@ -93,6 +94,9 @@ class Dropbox:
         self._root.destroy()
 
     def list_folder(self, msg_listbox, cursor="", content_json_entries=[]):
+        if self._path == '/':
+            self._path = ''
+
         if not cursor:
             print("/list_folder")
             uri = "https://api.dropboxapi.com/2/files/list_folder"
@@ -105,9 +109,9 @@ class Dropbox:
         data_json = json.dumps(data)
         # Call Dropbox API
         headers = {'Host': 'api.dropboxapi.com',
-                     'Authorization': 'Bearer ' + self._access_token,
-                     'Content-Type': 'application/json',
-                     'Content-Length': str(len(data_json))}
+                   'Authorization': 'Bearer ' + self._access_token,
+                   'Content-Type': 'application/json',
+                   'Content-Length': str(len(data_json))}
         response = requests.post(uri, headers=headers, data=data_json, allow_redirects=False)
 
         content = response.text
@@ -120,11 +124,27 @@ class Dropbox:
     def transfer_file(self, file_path, file_data):
         print("/upload " + file_path)
 
+        method = 'POST'
+        uri = 'https://content.dropboxapi.com/2/files/upload'
+
+        data = {"autorename": False,
+                "mode": "add",
+                "mute": False,
+                "path": file_path,
+                "strict_conflict": False}
+
+        data_json = json.dumps(data)
+
+        headers = {'Host': 'api.dropboxapi.com',
+                   'Authorization': 'Bearer ' + self._access_token,
+                   'Content-Type': 'application/json',
+                   'Content-Length': str(len(data_json))}
+
+        response = requests.request(method, uri, headers=headers, data=data, allow_redirects=False)
+
 
     def delete_file(self, file_path):
         print("/delete_file " + file_path)
 
-
     def create_folder(self, path):
         print("/create_folder " + path)
-
