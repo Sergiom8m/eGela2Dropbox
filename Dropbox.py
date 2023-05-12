@@ -43,16 +43,11 @@ class Dropbox:
         print("Auth_code: " + auth_code)
 
         # Send a response to the user
-        http_response = """\
-            HTTP/1.1 200 OK
-
-            <html>
-            <head><title>Proba</title></head>
-            <body>
-            The authentication flow has completed. Close this window.
-            </body>
-            </html>
-            """
+        http_response = "HTTP/1.1 200 OK\r\n\r\n" \
+                        "<html>" \
+                        "<head><title>Proba</title></head>" \
+                        "<body>The authentication flow has completed. Close this window.</body>" \
+                        "</html>"
 
         client_connection.sendall(str.encode(http_response))
         client_connection.close()
@@ -85,66 +80,116 @@ class Dropbox:
         response = requests.post(uri, headers=headers, data=data, allow_redirects=False)
 
         status_code = response.status_code
+        print(status_code)
         content = response.text
         content_json = json.loads(content)
         access_token = content_json['access_token']
         print('Access token:' + access_token)
+        print("Autentifikazio fluxua amaitu da.")
 
         self._access_token = access_token
         self._root.destroy()
 
     def list_folder(self, msg_listbox, cursor="", content_json_entries=[]):
+
         if self._path == '/':
             self._path = ''
 
         if not cursor:
             print("/list_folder")
             uri = "https://api.dropboxapi.com/2/files/list_folder"
-            data = {'path': self._path}
+            data = {'path': self._path, 'recursive': False}
 
         else:
             uri = "https://api.dropboxapi.com/2/files/list_folder/continue"
             data = {'cursor': cursor}
 
         data_json = json.dumps(data)
+
         # Call Dropbox API
         headers = {'Host': 'api.dropboxapi.com',
                    'Authorization': 'Bearer ' + self._access_token,
-                   'Content-Type': 'application/json',
-                   'Content-Length': str(len(data_json))}
+                   'Content-Type': 'application/json'}
+
         response = requests.post(uri, headers=headers, data=data_json, allow_redirects=False)
 
-        content = response.text
+        content = response.content
         content_json = json.loads(content)
+
+        content_json_entries = content_json['entries']
+
         if content_json['has_more']:
             self.list_folder(msg_listbox, content_json['cursor'], content_json_entries)
         else:
             self._files = helper.update_listbox2(msg_listbox, self._path, content_json_entries)
 
     def transfer_file(self, file_path, file_data):
+
         print("/upload " + file_path)
 
-        method = 'POST'
         uri = 'https://content.dropboxapi.com/2/files/upload'
 
-        data = {"autorename": False,
-                "mode": "add",
-                "mute": False,
-                "path": file_path,
-                "strict_conflict": False}
+        data = {"autorename": True,
+                    "mode": "add",
+                    "mute": False,
+                    "path": file_path,
+                    "strict_conflict": False}
+
+        data_json = json.dumps(data)
+
+        headers = {'Host': 'content.dropboxapi.com',
+                        'Authorization': 'Bearer ' + self._access_token,
+                        'Dropbox-API-Arg': data_json,
+                        'Content-Type': 'application/octet-stream'}
+
+        response = requests.post(uri, headers=headers, data=file_data, allow_redirects=False)
+
+        status = response.status_code
+        print("\nStatus: " + str(status) + " " + response.reason)
+
+        if status == 200:
+            print('\n FITXATEGIAK TRANSFERITU DIRA')
+
+    def delete_file(self, file_path):
+
+        print("/delete_file " + file_path)
+
+        uri = 'https://api.dropboxapi.com/2/files/delete_v2'
+
+        data = {"path": file_path}
+
+        data_json = json.dumps(data)
+
+        headers = {'Host': 'api.dropboxapi.com',
+                        'Authorization': 'Bearer ' + self._access_token,
+                        'Content-Type': 'application/json'}
+
+        response = requests.post(uri, headers=headers, data=data_json, allow_redirects=False)
+
+        status = response.status_code
+        print("\nStatus: " + str(status) + " " + response.reason)
+
+        if status == 200:
+            print('\n FITXATEGIA EZABATU DA')
+
+    def create_folder(self, path):
+
+        print("/create_folder " + path)
+
+        uri = 'https://api.dropboxapi.com/2/files/create_folder_v2'
+
+        data = {"path": path, "autorename": False}
 
         data_json = json.dumps(data)
 
         headers = {'Host': 'api.dropboxapi.com',
                    'Authorization': 'Bearer ' + self._access_token,
-                   'Content-Type': 'application/json',
-                   'Content-Length': str(len(data_json))}
+                   'Content-Type': 'application/json'}
 
-        response = requests.request(method, uri, headers=headers, data=data, allow_redirects=False)
+        response = requests.post(uri, headers=headers, data=data_json, allow_redirects=False)
 
+        status = response.status_code
+        print("\nStatus: " + str(status) + " " + response.reason)
 
-    def delete_file(self, file_path):
-        print("/delete_file " + file_path)
-
-    def create_folder(self, path):
-        print("/create_folder " + path)
+        if status == 200:
+            print('\n KARPETA SORTU DA')
