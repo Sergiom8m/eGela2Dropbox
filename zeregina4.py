@@ -221,7 +221,6 @@ def download():
                 path = dropbox._path + "/" + name
                 status = dropbox.download(path)
             if str(dropbox._files[each]['.tag']) == "folder":
-                print("Download zip")
                 status = dropbox.download_zip(path)
         progress += progress_step
         progress_var.set(progress)

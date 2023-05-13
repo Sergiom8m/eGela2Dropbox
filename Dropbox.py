@@ -85,7 +85,7 @@ class Dropbox:
         content_json = json.loads(content)
         access_token = content_json['access_token']
         print('Access token:' + access_token)
-        print("Autentifikazio fluxua amaitu da.")
+        print("Authentication flow finished!")
 
         self._access_token = access_token
         self._root.destroy()
@@ -129,11 +129,11 @@ class Dropbox:
 
         uri = 'https://content.dropboxapi.com/2/files/upload'
 
-        data = {"autorename": True,
-                    "mode": "add",
-                    "mute": False,
-                    "path": file_path,
-                    "strict_conflict": False}
+        data = {'autorename': True,
+                    'mode': "add",
+                    'mute': False,
+                    'path': file_path,
+                    'strict_conflict': False}
 
         data_json = json.dumps(data)
 
@@ -148,7 +148,7 @@ class Dropbox:
         print("\nStatus: " + str(status) + " " + response.reason)
 
         if status == 200:
-            print('\n FITXATEGIAK TRANSFERITU DIRA')
+            print('\n THE FILES HAVE BEEN TRANSFERRED')
 
     def delete_file(self, file_path):
 
@@ -170,7 +170,7 @@ class Dropbox:
         print("\nStatus: " + str(status) + " " + response.reason)
 
         if status == 200:
-            print('\n FITXATEGIA EZABATU DA')
+            print('\n FILE DELETED')
 
     def create_folder(self, path):
 
@@ -178,7 +178,7 @@ class Dropbox:
 
         uri = 'https://api.dropboxapi.com/2/files/create_folder_v2'
 
-        data = {'path': path, 'autorename"': False}
+        data = {'path': path, 'autorename': False}
 
         data_json = json.dumps(data)
 
@@ -192,13 +192,14 @@ class Dropbox:
         print("\nStatus: " + str(status) + " " + response.reason)
 
         if status == 200:
-            print('\n KARPETA SORTU DA')
+            print('\n FOLDER CREATED')
 
     def move(self, fromPath, toPath):
 
         print("\n/move_file from " + fromPath + " to " + toPath)
 
         uri = 'https://api.dropboxapi.com/2/files/move_v2'
+
         data = {'allow_ownership_transfer': False,
                     'allow_shared_folder': False,
                     'autorename': False,
@@ -215,15 +216,12 @@ class Dropbox:
                       allow_redirects=False)
 
         status = response.status_code
-        content = response.content
-
         print("\nStatus: " + str(status) + " " + response.reason)
 
         if status == 200:
-            print('FITXATEGIA MUGITU DA')
+            print('FILE MOVED SUCCESSFULLY')
         elif status == 409:
-            print('ERRORE BAT SUERTATU DA, KONPROBATU PATH-A ONDO JARRITA DAGOELA (EMANDAKO FORMATOAN)'
-                  '\n BALITEKE ERE MUGITZEKO FITXATEGIRIK HAUTATU EZ IZANA')
+            print('ERROR, TRY AGAIN')
         return status
 
     def copy(self, fromPath, toPath):
@@ -250,10 +248,9 @@ class Dropbox:
         print("\nStatus: " + str(status) + " " + response.reason)
 
         if status == 200:
-            print('FITXATEGIA KOPIATU DA')
+            print('FILE COPIED SUCCESSFULLY')
         elif status == 409:
-            print('ERRORE BAT SUERTATU DA, KONPROBATU PATH-A ONDO JARRITA DAGOELA (EMANDAKO FORMATOAN)'
-                  '\n BALITEKE ERE KOPIATZEKO FITXATEGIRIK HAUTATU EZ IZANA')
+            print('ERROR , TRY AGAIN')
         return status
 
     def share(self, path, email):
@@ -282,7 +279,7 @@ class Dropbox:
         print(response.content)
 
         if status == 200:
-            print('PARTEKATU DA FITXATEGIA')
+            print('FILE SHARED SUCCESSFULLY')
 
     def download(self, path):
 
@@ -306,9 +303,9 @@ class Dropbox:
         if status == 200:
             with open(path.split('/')[-1], 'wb') as exp_file:
                 exp_file.write(response.content)
-            print('DESKARGATU DA FITXATEGIA')
+            print('FILE DOWNLOADED SUCCESSFULLY')
         elif status == 409:
-            print('EZ DA FITXATEGIA')
+            print('ERROR, NOT A FILE!')
 
     def download_zip(self, path):
 
@@ -334,6 +331,4 @@ class Dropbox:
             zip_fitxategia = open(path.split('/')[-1] + '.zip', 'wb')
             zip_fitxategia.write(edukia)
             zip_fitxategia.close()
-            print('###############################################################################')
-            print('KARPETAREN ZIP-A JEITSI DA')
-            print('###############################################################################')
+            print('FOLDER DOWNLOADED SUCCESSFULLY')
