@@ -211,7 +211,7 @@ class Dropbox:
                      'Authorization': 'Bearer ' + self._access_token,
                      'Content-Type': 'application/json'}
 
-        response = requests.post(uri, headers=headers, data=data,
+        response = requests.post(uri, headers=headers, data=data_json,
                       allow_redirects=False)
 
         status = response.status_code
@@ -263,7 +263,7 @@ class Dropbox:
         uri = 'https://api.dropboxapi.com/2/sharing/add_file_member'
 
         data = {'access_level': 'viewer',
-                      'add_message_as_comment': True,
+                      'add_message_as_comment': False,
                       'custom_message': 'I shared this document with you:',
                       'file': path,
                       'members': [{'.tag': 'email', 'email': email}],
@@ -279,15 +279,16 @@ class Dropbox:
 
         status = response.status_code
         print("\nStatus: " + str(status) + " " + response.reason)
+        print(response.content)
 
         if status == 200:
             print('PARTEKATU DA FITXATEGIA')
 
-    def download_zip(self, path):
+    def download(self, path):
 
-        print("\n/download_zip " + path)
+        print("\n/download " + path)
 
-        uri = 'https://content.dropboxapi.com/2/files/download_zip'
+        uri = 'https://content.dropboxapi.com/2/files/download'
 
         data = {'path': path}
 
@@ -295,16 +296,44 @@ class Dropbox:
 
         headers = {'Host': 'content.dropboxapi.com',
                      'Authorization': 'Bearer ' + self._access_token,
-                     'Dropbox-API-Arg': data}
+                     'Dropbox-API-Arg': data_json}
 
         response = requests.post(uri, headers=headers, data=data_json, allow_redirects=False)
 
         status = response.status_code
-        content = response.content
         print("\nStatus: " + str(status) + " " + response.reason)
 
         if status == 200:
-            zip = open(path.split('/')[-1] + '.zip', 'wb')
-            zip.write(content)
-            zip.close()
+            with open(path.split('/')[-1], 'wb') as exp_file:
+                exp_file.write(response.content)
+            print('DESKARGATU DA FITXATEGIA')
+        elif status == 409:
+            print('EZ DA FITXATEGIA')
+
+    def download_zip(self, path):
+
+        print("\n/download_zip " + path)
+
+        uri = 'https://content.dropboxapi.com/2/files/download_zip'
+
+        parameters = {"path": path}
+
+        data = json.dumps(parameters)
+
+        goiburuak = {'Host': 'content.dropboxapi.com',
+                     'Authorization': 'Bearer ' + self._access_token,
+                     'Dropbox-API-Arg': data}
+
+        response = requests.post(uri, headers=goiburuak, data=data, allow_redirects=False)
+
+        status = response.status_code
+        edukia = response.content
+        print("\nStatus: " + str(status) + " " + response.reason)
+
+        if status == 200:
+            zip_fitxategia = open(path.split('/')[-1] + '.zip', 'wb')
+            zip_fitxategia.write(edukia)
+            zip_fitxategia.close()
+            print('###############################################################################')
             print('KARPETAREN ZIP-A JEITSI DA')
+            print('###############################################################################')

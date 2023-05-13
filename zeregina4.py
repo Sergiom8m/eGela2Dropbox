@@ -106,6 +106,182 @@ def create_folder():
     send_button.pack(side=tk.TOP)
     dropbox._root = popup
 
+def copy_file():
+
+
+    page = tk.Toplevel()
+    page.geometry('300x200')
+    page.title('Copy')
+    page.iconbitmap('./favicon.ico')
+    helper.center(page)
+
+    label = tk.Label(page, text="Where do you want to copy it?")
+    label.pack()
+    label2 = tk.Label(page, text="(/path/to/folder/)")
+    label2.pack()
+    entry_field = tk.Entry(page)
+    entry_field.pack()
+
+    def copy():
+        folder_path = entry_field.get()
+
+        popup, progress_var, progress_bar = helper.progress("copy_file", "Copying files...")
+        progress = 0
+        progress_var.set(progress)
+        progress_bar.update()
+        progress_step = float(100.0 / len(selected_items2))
+        status = 200
+        for each in selected_items2:
+            if status == 200:
+                name = dropbox._files[each]['name']
+                if dropbox._path == "/":
+                    path = "/" + name
+                else:
+                    path = dropbox._path + "/" + name
+                status = dropbox.copy(path, folder_path + name)
+
+            progress += progress_step
+            progress_var.set(progress)
+            progress_bar.update()
+            newroot.update()
+
+            time.sleep(0.1)
+
+        popup.destroy()
+        dropbox.list_folder(msg_listbox2)
+        msg_listbox2.yview(tk.END)
+
+    send_button = tk.Button(page, text="Send", command=copy)
+    send_button.pack()
+    dropbox._root = page
+
+
+def move_file():
+
+    page = tk.Toplevel()
+    page.geometry('300x200')
+    page.title('Move')
+    page.iconbitmap('./favicon.ico')
+    helper.center(page)
+
+    label = tk.Label(page, text="Where do you want to move it?")
+    label.pack()
+    label2 = tk.Label(page, text="(/path/to/folder/)")
+    label2.pack()
+    entry_field = tk.Entry(page)
+    entry_field.pack()
+
+    def move():
+        folder_path = entry_field.get()
+
+        popup, progress_var, progress_bar = helper.progress("move_file", "Moving files...")
+        progress = 0
+        progress_var.set(progress)
+        progress_bar.update()
+        progress_step = float(100.0 / len(selected_items2))
+
+        for each in selected_items2:
+            name = dropbox._files[each]['name']
+            if dropbox._path == "/":
+                path = "/" + name
+            else:
+                path = dropbox._path + "/" + name
+            dropbox.move(path, folder_path + name)
+
+            progress += progress_step
+            progress_var.set(progress)
+            progress_bar.update()
+            newroot.update()
+
+            time.sleep(0.1)
+
+        popup.destroy()
+        dropbox.list_folder(msg_listbox2)
+        msg_listbox2.yview(tk.END)
+
+    send_button = tk.Button(page, text="Send", command=move)
+    send_button.pack()
+    dropbox._root = page
+
+def download():
+    print("Download file")
+    popup, progress_var, progress_bar = helper.progress("move_file", "Moving files...")
+    progress = 0
+    progress_var.set(progress)
+    progress_bar.update()
+    progress_step = float(100.0 / len(selected_items2))
+    status = 200
+    for each in selected_items2:
+        if status == 200:
+            name = dropbox._files[each]['name']
+            if dropbox._path == "/":
+                path = "/" + name
+                status = dropbox.download(path)
+            else:
+                path = dropbox._path + "/" + name
+                status = dropbox.download(path)
+            if str(dropbox._files[each]['.tag']) == "folder":
+                print("Download zip")
+                status = dropbox.download_zip(path)
+        progress += progress_step
+        progress_var.set(progress)
+        progress_bar.update()
+        newroot.update()
+
+        time.sleep(0.1)
+
+    popup.destroy()
+    dropbox.list_folder(msg_listbox2)
+    msg_listbox2.yview(tk.END)
+def add_file_member():
+
+    print("Add file member")
+
+    page = tk.Toplevel()
+    page.geometry('300x200')
+    page.title('Move')
+    page.iconbitmap('./favicon.ico')
+    helper.center(page)
+
+    label = tk.Label(page, text="Write the email to share with the selected file.\n")
+    label.pack()
+    label2 = tk.Label(page, text="JUST FILES!\n")
+    label2.pack()
+    entry_field = tk.Entry(page)
+    entry_field.pack()
+
+    def add_member():
+        email = entry_field.get()
+
+        popup, progress_var, progress_bar = helper.progress("add_file_member", "Adding member...")
+        progress = 0
+        progress_var.set(progress)
+        progress_bar.update()
+        progress_step = float(100.0 / len(selected_items2))
+
+        for each in selected_items2:
+            name = dropbox._files[each]['name']
+            if dropbox._path == "/":
+                path = "/" + name
+            else:
+                path = dropbox._path + "/" + name
+            dropbox.share(path, email)
+
+            progress += progress_step
+            progress_var.set(progress)
+            progress_bar.update()
+            newroot.update()
+
+            time.sleep(0.1)
+
+        popup.destroy()
+        dropbox.list_folder(msg_listbox2)
+        msg_listbox2.yview(tk.END)
+
+    send_button = tk.Button(page, text="Send", command=add_member)
+    send_button.pack()
+    dropbox._root = page
+
 ##########################################################################################################
 
 def check_credentials(event= None):
@@ -218,7 +394,6 @@ messages_frame1 = tk.Frame(newroot)
 msg_listbox1 = make_listbox(messages_frame1)
 msg_listbox1.bind('<<ListboxSelect>>', on_selecting1)
 msg_listbox1.pack(side=tk.LEFT, fill=tk.BOTH)
-#messages_frame1.pack()
 messages_frame1.grid(row=1, column=0, ipadx=10, ipady=2, padx=2, pady=2)
 
 # Frame >>> botoiarekin (1,1)
@@ -234,7 +409,6 @@ msg_listbox2 = make_listbox(messages_frame2)
 msg_listbox2.bind('<<ListboxSelect>>', on_selecting2)
 msg_listbox2.bind('<Double-Button-1>', on_double_clicking2)
 msg_listbox2.pack(side=tk.RIGHT, fill=tk.BOTH)
-#messages_frame2.pack()
 messages_frame2.grid(row=1, column=2, ipadx=10, ipady=2, padx=2, pady=2)
 
 # Sortu eta ezabatu botoia duen Frame-a  (1,3)
@@ -244,6 +418,8 @@ button2.pack(padx=2, pady=2)
 button3 = tk.Button(frame2, borderwidth=4, text="Create folder", width=10, pady=8, command=create_folder)
 button3.pack(padx=2, pady=2)
 frame2.grid(column=3, row=1, ipadx=10, ipady=10)
+
+#Sortutako botoi extrak
 button4 = tk.Button(frame2, borderwidth=4, text="Download", width=10, pady=8, command=download)
 button4.pack(padx=2, pady=2)
 frame2.grid(column=3, row=1, ipadx=10, ipady=10)
