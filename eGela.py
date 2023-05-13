@@ -23,13 +23,13 @@ class eGela:
         self._root = root
 
     def check_credentials(self, username, password, event=None):
-        global LOGIN_EGIAZTAPENA
+        global LOGIN_CHECK
         popup, progress_var, progress_bar = helper.progress("check_credentials", "Logging into eGela...")
         progress = 0
         progress_var.set(progress)
         progress_bar.update()
 
-        print("##### 1. ESKAERA (Login inprimakia lortu 'logintoken' ateratzeko #####")
+        print("##### 1. REQUEST (Get login form to get 'logintoken' #####")
 
         method = 'GET'
         self._uriRequest = 'https://egela.ehu.eus/login/index.php'
@@ -41,7 +41,7 @@ class eGela:
 
         html_file = response.content
 
-        print("##### HTML-aren azterketa... #####")
+        print("##### HTML ANALYSIS... #####")
 
         main_page = BeautifulSoup(html_file, 'html.parser')
         form = main_page.find_all('form', {'class': 'm-t-1 ehuloginform'})[0]
@@ -55,17 +55,17 @@ class eGela:
         try:
             self._cookie = response.headers['Set-Cookie'].split(";")[0]
         except Exception:
-            print("Cookie-a mantentzen da")
+            print("SAME COOKIE")
 
-        print("1.Eskaeraren metodoa eta URIa :", method, self._uriRequest)
-        print("1.Eskaera: " + str(response.status_code) + " " + response.reason)
+        print("1. request method and URI :", method, self._uriRequest)
+        print("1. request: " + str(response.status_code) + " " + response.reason)
 
         progress = 25
         progress_var.set(progress)
         progress_bar.update()
         time.sleep(0.1)
 
-        print("\n##### 2. ESKAERA (Kautotzea -datu bidalketa-) #####")
+        print("\n##### 2. REQUEST (Authentication -Data sending-) #####")
 
         method = 'POST'
         headers = {'Host': 'egela.ehu.eus', 'Cookie': self._cookie,
@@ -87,8 +87,8 @@ class eGela:
         else:
             print('Login successful')
 
-        print("2.Eskaeraren metodoa eta URIa :", method, self._uriRequest)
-        print("2.Eskaera: " + str(response.status_code) + " " + response.reason)
+        print("2. request method and URI :", method, self._uriRequest)
+        print("2. request: " + str(response.status_code) + " " + response.reason)
 
         if ('Location' in response.headers) is not False:
             self._uriRequest = response.headers['Location']
@@ -96,14 +96,14 @@ class eGela:
         try:
             self._cookie = response.headers['Set-Cookie'].split(";")[0]
         except Exception:
-            print("Cookie-a mantentzen da")
+            print("SAME COOKIE")
 
         progress = 50
         progress_var.set(progress)
         progress_bar.update()
         time.sleep(0.1)
 
-        print("\n##### 3. ESKAERA (berbidalketa) #####")
+        print("\n##### 3. REQUEST (Redirection) #####")
 
         method = 'GET'
         headers = {'Host': 'egela.ehu.eus', 'Cookie': self._cookie}
@@ -112,8 +112,8 @@ class eGela:
         response = requests.request(method, self._uriRequest, headers=headers, data=content,
                                     allow_redirects=False)
 
-        print("3.Eskaeraren metodoa eta URIa :", method, self._uriRequest)
-        print("3.Eskaera: " + str(response.status_code) + " " + response.reason)
+        print("3. request method and URI :", method, self._uriRequest)
+        print("3. request: " + str(response.status_code) + " " + response.reason)
 
         if ('Location' in response.headers) is not False:
             self._uriRequest = response.headers['Location']
@@ -121,7 +121,7 @@ class eGela:
         try:
             self._cookie = response.headers['Set-Cookie'].split(";")[0]
         except Exception:
-            print("Cookie-a mantentzen da")
+            print("SAME COOKIE")
 
 
         progress = 75
@@ -129,7 +129,7 @@ class eGela:
         progress_bar.update()
         time.sleep(0.1)
 
-        print("\n##### 4. ESKAERA (eGelako orrialde nagusia) #####")
+        print("\n##### 4. REQUEST (Egela main page) #####")
 
         method = 'GET'
         headers = {'Host': 'egela.ehu.eus', 'Cookie': self._cookie}
@@ -138,8 +138,8 @@ class eGela:
         response = requests.request(method, self._uriRequest, headers=headers, data=content,
                                     allow_redirects=False)
 
-        print("4.Eskaeraren metodoa eta URIa :", method, self._uriRequest)
-        print("4.Eskaera: " + str(response.status_code) + " " + response.reason)
+        print("4. request method and URI :", method, self._uriRequest)
+        print("4. request: " + str(response.status_code) + " " + response.reason)
 
         if ('Location' in response.headers) is not False:
             self._uriRequest = response.headers['Location']
@@ -147,10 +147,10 @@ class eGela:
         try:
             self._cookie = response.headers['Set-Cookie'].split(";")[0]
         except Exception:
-            print("Cookie-a mantentzen da")
+            print("SAME COOKIE")
 
         if int(response.status_code) == 200:
-            LOGIN_EGIAZTAPENA = True
+            LOGIN_CHECK = True
 
 
 
@@ -160,8 +160,8 @@ class eGela:
         time.sleep(0.1)
         popup.destroy()
 
-        print("\n##### LOGIN EGIAZTAPENA #####")
-        if LOGIN_EGIAZTAPENA:
+        print("\n##### LOGIN CHECK #####")
+        if LOGIN_CHECK:
             self._login = 1
             print('Login successful')
             self._root.destroy()
@@ -174,7 +174,7 @@ class eGela:
         progress_var.set(progress)
         progress_bar.update()
 
-        print("\n##### 5. ESKAERA (Ikasgairen eGelako orrialdea) #####")
+        print("\n##### 5. REQUEST (Subject page from Egela) #####")
 
         method = 'GET'
         headers = {'Host': 'egela.ehu.eus', 'Cookie': self._cookie}
@@ -194,7 +194,7 @@ class eGela:
                 print(subject)
                 print(self._subject)
 
-        print("\n##### HTML-aren azterketa... #####")
+        print("\n##### HTML ANALYSIS... #####")
 
         method = 'GET'
         headers = {'Host': 'egela.ehu.eus', 'Cookie': self._cookie}
@@ -236,13 +236,12 @@ class eGela:
             progress_bar.update()
             time.sleep(0.1)
 
-        # print(self._refs)
         popup.destroy()
 
         return self._refs
 
     def get_pdf(self, selection):
-        print("##### PDF-a deskargatzen... #####")
+        print("##### DOWNLOADING PDF #####")
 
         pdf_file = self._refs[selection]['pdf_link']
         pdf_name = self._refs[selection]['pdf_name']

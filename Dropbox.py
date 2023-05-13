@@ -90,6 +90,10 @@ class Dropbox:
         self._access_token = access_token
         self._root.destroy()
 
+    ################################################################################################
+    # THIS METHOD LISTS ALL THE FILES LOADED ON THE USERS DROPBOX ACCOUNT
+    ################################################################################################
+
     def list_folder(self, msg_listbox, cursor="", content_json_entries=[]):
 
         if self._path == '/':
@@ -123,6 +127,10 @@ class Dropbox:
         else:
             self._files = helper.update_listbox2(msg_listbox, self._path, content_json_entries)
 
+    ################################################################################################
+    # THIS METHOD UPLOADS FILES FROM LOCAL DIRECTORY TO USERS DROPBOX ACCOUNT
+    ################################################################################################
+
     def transfer_file(self, file_path, file_data):
 
         print("/upload " + file_path)
@@ -150,6 +158,10 @@ class Dropbox:
         if status == 200:
             print('\n THE FILES HAVE BEEN TRANSFERRED')
 
+    ################################################################################################
+    # THIS METHOD DELETES THE SELECTED FILES AND FOLDERS FROM THE USERS DROPBOX ACCOUNT
+    ################################################################################################
+
     def delete_file(self, file_path):
 
         print("/delete_file " + file_path)
@@ -172,6 +184,11 @@ class Dropbox:
         if status == 200:
             print('\n FILE DELETED')
 
+    ################################################################################################
+    # THIS METHOD CREATES FOLDERS ON USERS DROPBOX ACCOUNT. FIRST CLICK "CREATE FOLDER" BUTTON, THEN
+    # SELECT THE FILES YOU WANT TO INSERT INTO THE NEW FOLDER AND TRANSFER THEM TO DROPBOX
+    ################################################################################################
+
     def create_folder(self, path):
 
         print("/create_folder " + path)
@@ -193,6 +210,10 @@ class Dropbox:
 
         if status == 200:
             print('\n FOLDER CREATED')
+
+    ################################################################################################
+    # THIS METHOD MOVES FILES INSIDE USERS DROPBOX ACCOUNT
+    ################################################################################################
 
     def move(self, fromPath, toPath):
 
@@ -224,6 +245,10 @@ class Dropbox:
             print('ERROR, TRY AGAIN')
         return status
 
+    ################################################################################################
+    # THIS METHOD COPIES FILES INSIDE USERS DROPBOX ACCOUNT
+    ################################################################################################
+
     def copy(self, fromPath, toPath):
 
         print("\n/copy_file from " + fromPath + " to " + toPath)
@@ -253,6 +278,10 @@ class Dropbox:
             print('ERROR , TRY AGAIN')
         return status
 
+    ################################################################################################
+    # THIS METHOD SHARES FILES FROM USERS DROPBOX ACCOUNT BY EMAIL
+    ################################################################################################
+
     def share(self, path, email):
 
         print("\n/add_file_member " + path)
@@ -281,6 +310,10 @@ class Dropbox:
         if status == 200:
             print('FILE SHARED SUCCESSFULLY')
 
+    ################################################################################################
+    # THIS METHOD DOWNLOADS FILES FROM USERS DROPBOX ACCOUNT TO LOCAL DIRECTORY
+    ################################################################################################
+
     def download(self, path):
 
         print("\n/download " + path)
@@ -306,6 +339,10 @@ class Dropbox:
             print('FILE DOWNLOADED SUCCESSFULLY')
         elif status == 409:
             print('ERROR, NOT A FILE!')
+
+    ################################################################################################
+    # THIS METHOD DOWNLOADS FOLDERS FROM USERS DROPBOX ACCOUNT TO LOCAL DIRECTORY AS A ZIP
+    ################################################################################################
 
     def download_zip(self, path):
 
