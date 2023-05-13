@@ -212,7 +212,7 @@ class Dropbox:
             print('\n FOLDER CREATED')
 
     ################################################################################################
-    # THIS METHOD MOVES FILES INSIDE USERS DROPBOX ACCOUNT
+    # THIS METHOD MOVES FILES OR FOLDERS INSIDE USERS DROPBOX ACCOUNT
     ################################################################################################
 
     def move(self, fromPath, toPath):
@@ -246,7 +246,7 @@ class Dropbox:
         return status
 
     ################################################################################################
-    # THIS METHOD COPIES FILES INSIDE USERS DROPBOX ACCOUNT
+    # THIS METHOD COPIES FILESOR FOLDERS INSIDE USERS DROPBOX ACCOUNT
     ################################################################################################
 
     def copy(self, fromPath, toPath):
@@ -279,7 +279,7 @@ class Dropbox:
         return status
 
     ################################################################################################
-    # THIS METHOD SHARES FILES FROM USERS DROPBOX ACCOUNT BY EMAIL
+    # THIS METHOD SHARES **ONLY FILES** FROM USERS DROPBOX ACCOUNT BY EMAIL
     ################################################################################################
 
     def share(self, path, email):
